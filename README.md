@@ -1,20 +1,20 @@
-# YouTube Chord Extractor & MIDI Generator (chordsAI)
+# Audio Chord Extractor & MIDI Generator (chordsAI)
 
-A web application that downloads audio from YouTube videos, analyzes the audio to recognize chord progressions using `librosa`, and generates a corresponding MIDI file.
+A web application that processes uploaded audio files or audio from direct URLs to analyze chord progressions using `librosa` and generate a corresponding MIDI file.
 
 ## Features
 
-*   Downloads audio from YouTube URLs.
+*   Processes audio from uploaded files (MP3, WAV, M4A, AAC, OGG) or direct audio URLs.
 *   Recognizes chord progressions from the audio using `librosa`.
 *   Generates a downloadable MIDI file based on the recognized chords.
-*   Simple, single-page web interface for URL input and results display.
+*   Simple, single-page web interface for file upload or URL input and results display.
 
 ## Tech Stack
 
 *   **Frontend:** React (via CDN in a single HTML file), Tailwind CSS (via CDN).
 *   **Backend:** Python, Flask.
 *   **Core Python Libraries:**
-    *   `yt-dlp`: For downloading audio from YouTube.
+    *   `requests`: For downloading audio from direct URLs.
     *   `librosa`: For audio processing and chord recognition.
     *   `pretty_midi`: For generating MIDI files.
     *   `Flask`: Web framework for the backend API.
@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed:
 
 1.  **Python:** Version 3.10 or newer. You can download it from [python.org](https://www.python.org/).
 2.  **pip:** Python package installer (usually comes with Python).
-3.  **FFmpeg:** Required by `yt-dlp` for audio processing.
+3.  **FFmpeg:** This can be beneficial for `librosa` to process a wider variety of audio formats. While `librosa` can handle many common formats without it, having FFmpeg installed can improve compatibility.
     *   **Local Development:** Ensure it's installed on your system and accessible via the PATH. You can download it from [ffmpeg.org](https://ffmpeg.org/download.html).
     *   **Railway Deployment:** FFmpeg is automatically installed during the build process via the `nixpacks.toml` configuration file included in this repository.
 4.  **Git (Optional):** For cloning the repository. Otherwise, you can download the source code as a ZIP file.
@@ -54,7 +54,7 @@ Before you begin, ensure you have the following installed:
         ```bash
         pip install -r requirements.txt
         ```
-    *   **FFmpeg Reminder (Local Development):** For local development, double-check that FFmpeg is installed and accessible in your system's PATH. `yt-dlp` will not be able to process audio effectively without it. (For Railway, see Prerequisites).
+    *   **FFmpeg Reminder (Local Development):** For local development, if you encounter issues with audio file formats, ensure FFmpeg is installed and accessible in your system's PATH. (For Railway, FFmpeg is handled by `nixpacks.toml`).
 
 3.  **Frontend Setup:**
     *   The frontend is a single HTML file located at `static/index.html`.
@@ -103,18 +103,26 @@ The included `nixpacks.toml` file handles the installation of system dependencie
 ## How to Use
 
 1.  Once the backend is running, open your web browser and navigate to the Flask server's address (typically `http://localhost:5000/`).
-2.  Enter a valid YouTube video URL into the input field.
-3.  Click the "Extract Chords & Generate MIDI" button.
-4.  Wait for processing. A loading indicator will be shown. This may take some time depending on the video.
-5.  **Results will be displayed:**
+2.  You have two options for providing audio:
+    *   **Option 1: File Upload**
+        *   Click the "Choose File" or similar button to open a file dialog.
+        *   Select an audio file from your computer. Supported formats include MP3, WAV, M4A, AAC, and OGG. The selected filename will appear next to the button.
+    *   **Option 2: Direct Audio URL**
+        *   Enter a direct URL to an audio file in the "Audio URL" input field (e.g., `https://example.com/path/to/your/audio.mp3`).
+        *   This must be a direct link to the audio data itself, not a link to a webpage containing an audio player (e.g., not a YouTube page URL).
+3.  If you provide both a URL and select a file, the uploaded file will take precedence.
+4.  Click the "Extract Chords & Generate MIDI" button.
+5.  Wait for processing. A loading indicator will be shown. This may take some time depending on the audio length and complexity.
+6.  **Results will be displayed:**
     *   A status message indicating the outcome.
     *   The list of recognized chords (using `librosa`).
     *   A download link for the generated MIDI file (if successful).
-6.  If an error occurs, an error message will be shown.
+7.  If an error occurs, an error message will be shown.
 
 ## Troubleshooting
 
-*   **Errors related to "ffmpeg" or "ffprobe" (Local Development):** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH. (For Railway, FFmpeg is handled by `nixpacks.toml`).
+*   **Errors related to "ffmpeg" or "ffprobe" (Local Development):** This may indicate an issue with `librosa` processing a specific file type if FFmpeg is not found or not correctly installed. While `librosa` handles many formats, FFmpeg can broaden its capabilities. Verify your FFmpeg installation and that its directory is in your system's PATH. (For Railway, FFmpeg is handled by `nixpacks.toml`).
+*   **Invalid Direct Audio URL:** If using the URL input, ensure it's a direct link to an audio file (e.g., ending in .mp3, .wav). Links to web pages (like YouTube) will not work with this input method.
 *   **Frontend shows "Error: Failed to fetch" or similar:**
     *   Ensure the Flask backend server (`python app.py`) is running.
     *   Check the terminal where you ran `python app.py` for any error messages from the backend.

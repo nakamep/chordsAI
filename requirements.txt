@@ -1,6 +1,6 @@
 Flask
-yt-dlp
 numpy
 scipy
 librosa
 pretty_midi
+requests

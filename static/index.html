@@ -17,15 +17,28 @@
 
     <script type="text/babel">
         const App = () => {
-            const [youtubeUrl, setYoutubeUrl] = React.useState('');
+            const [audioUrl, setAudioUrl] = React.useState(''); // Renamed from youtubeUrl
+            const [selectedFile, setSelectedFile] = React.useState(null); // New state for file input
             const [isLoading, setIsLoading] = React.useState(false);
             const [results, setResults] = React.useState(null);
             const [error, setError] = React.useState('');
 
             // const backendUrl = 'http://localhost:5000'; // Removed for relative paths
 
-            const handleUrlChange = (event) => {
-                setYoutubeUrl(event.target.value);
+            const handleAudioUrlChange = (event) => { // Renamed from handleUrlChange
+                setAudioUrl(event.target.value);
+                if (event.target.value) { // Clear file input if URL is typed
+                    setSelectedFile(null); 
+                    const fileInput = document.getElementById('audio_file_input');
+                    if (fileInput) fileInput.value = ''; // Reset file input visually
+                }
+            };
+
+            const handleFileChange = (event) => {
+                setSelectedFile(event.target.files[0]);
+                if (event.target.files[0]) { // Clear URL input if file is selected
+                    setAudioUrl('');
+                }
             };
 
             const handleSubmit = async (event) => {
@@ -34,13 +47,26 @@
                 setResults(null);
                 setError('');
 
+                const formData = new FormData();
+                if (audioUrl) {
+                    formData.append('audio_url', audioUrl);
+                }
+                if (selectedFile) {
+                    formData.append('audio_file', selectedFile);
+                }
+
+                // Ensure at least one input is provided
+                if (!audioUrl && !selectedFile) {
+                    setError('Please provide a URL or select an audio file.');
+                    setIsLoading(false);
+                    return;
+                }
+                
                 try {
-                    const response = await fetch('/analyze', { // Changed to relative path
+                    const response = await fetch('/analyze', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ url: youtubeUrl }),
+                        // Content-Type header is automatically set by the browser for FormData
+                        body: formData, 
                     });
 
                     const data = await response.json();
@@ -76,24 +102,50 @@
             return (
                 <div className="w-full max-w-xl bg-white shadow-xl rounded-lg p-8 space-y-6">
                     <h1 className="text-2xl font-bold text-center text-gray-800">
-                        YouTube Chord Extractor & MIDI Generator
+                        Audio Chord Extractor & MIDI Generator
                     </h1>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form id="uploadForm" encType="multipart/form-data" onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="youtube-url" className="block text-sm font-medium text-gray-700">
-                                YouTube Video URL
+                            <label htmlFor="audio_url_input" className="block text-sm font-medium text-gray-700">
+                                Audio URL (e.g., YouTube, direct MP3 link)
                             </label>
                             <input
-                                type="url" // Use type="url" for better validation
-                                id="youtube-url"
-                                value={youtubeUrl}
-                                onChange={handleUrlChange}
-                                placeholder="e.g., https://www.youtube.com/watch?v=VIDEO_ID"
+                                type="url"
+                                id="audio_url_input"
+                                name="audio_url" // Added name attribute
+                                value={audioUrl}
+                                onChange={handleAudioUrlChange}
+                                placeholder="Enter a YouTube URL or direct audio link"
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
+                                // Removed 'required' to allow either URL or file
                             />
                         </div>
+
+                        <div className="text-center my-2">
+                            <span className="text-sm text-gray-500">OR</span>
+                        </div>
+
+                        <div>
+                            <label htmlFor="audio_file_input" className="block text-sm font-medium text-gray-700">
+                                Upload Audio File
+                            </label>
+                            <input
+                                type="file"
+                                id="audio_file_input"
+                                name="audio_file" // Added name attribute
+                                accept=".mp3,.wav,.m4a,.aac,.ogg"
+                                onChange={handleFileChange}
+                                className="mt-1 block w-full text-sm text-gray-500
+                                           file:mr-4 file:py-2 file:px-4
+                                           file:rounded-full file:border-0
+                                           file:text-sm file:font-semibold
+                                           file:bg-indigo-50 file:text-indigo-700
+                                           hover:file:bg-indigo-100"
+                            />
+                             {selectedFile && <p className="text-xs text-gray-500 mt-1">Selected: {selectedFile.name}</p>}
+                        </div>
+                        
                         <button
                             type="submit"
                             disabled={isLoading}
