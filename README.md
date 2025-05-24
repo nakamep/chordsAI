@@ -69,6 +69,9 @@ Before you begin, ensure you have the following installed:
         python app.py
         ```
     *   The backend server will start, typically on `http://localhost:5000`. You should see log messages in your terminal, including the availability status of `librosa` and `pretty_midi`.
+    *   **Note on Port Configuration:**
+        When running `python app.py` locally, the application defaults to port 5000.
+        When deployed to platforms like Railway, the application will automatically use the port number specified by the `PORT` environment variable set by the platform.
 
 2.  **Launch the Frontend:**
     *   Open the `frontend/index.html` file directly in your web browser (e.g., by double-clicking it or using "File > Open" in your browser).
