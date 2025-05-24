@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import os
 import yt_dlp # For downloading YouTube audio
 import numpy as np # For librosa
@@ -25,6 +25,12 @@ except ImportError:
 
 app = Flask(__name__)
 app.logger.info(f"Starting app with library status: {app_log_extra.strip()}")
+
+@app.route('/')
+def serve_index():
+    # Serves the index.html from the 'static' directory
+    # The 'static' directory should be at the same level as app.py
+    return send_from_directory('static', 'index.html')
 
 TEMP_AUDIO_DIR = 'temp_audio'
 TEMP_MIDI_DIR = 'static/midi' # MIDI files saved here
