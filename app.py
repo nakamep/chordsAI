@@ -208,4 +208,5 @@ def analyze():
             except Exception as e: app.logger.error(f"Error cleaning {downloaded_mp3_path}: {e}")
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000)) # Default to 5000 if PORT not set
+    app.run(debug=False, host='0.0.0.0', port=port) # Set debug=False for production-like environment
