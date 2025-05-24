@@ -46,11 +46,28 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                        // Throw an object that includes error and details if available from backend JSON
+                        const errorPayload = { 
+                            error: data.error || `HTTP error! Status: ${response.status}`, 
+                            details: data.details || null 
+                        };
+                        throw errorPayload;
                     }
                     setResults(data);
                 } catch (err) {
-                    setError(err.message || 'An unknown error occurred while fetching results.');
+                    // Check if the error object has 'error' and 'details' fields (from our custom throw)
+                    if (err && err.error) {
+                        let errorMessage = `Error: ${err.error}`;
+                        if (err.details) {
+                            errorMessage += ` - Details: ${err.details}`;
+                        }
+                        setError(errorMessage);
+                    } else if (err && err.message) { // For network errors or other generic Error objects
+                        setError(`Error: ${err.message}`);
+                    } else { // Fallback for unknown errors
+                        setError('An unknown error occurred while fetching results. Check console.');
+                    }
+                    console.error('Fetch error:', err); // Log the full error for debugging
                 } finally {
                     setIsLoading(false);
                 }
