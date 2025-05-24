@@ -1,21 +1,12 @@
 from flask import Flask, request, jsonify
 import os
 import yt_dlp # For downloading YouTube audio
-import numpy as np # For librosa and potentially madmom if it uses numpy arrays
+import numpy as np # For librosa
 
 # --- Library Availability Flags ---
-MADMOM_AVAILABLE = False
 LIBROSA_AVAILABLE = False
 PRETTY_MIDI_AVAILABLE = False
 app_log_extra = ""
-
-try:
-    from madmom.audio.signal import Signal
-    from madmom.features.chords import DBNChordRecognitionProcessor, CRFChordRecognitionProcessor
-    MADMOM_AVAILABLE = True
-    app_log_extra += "(madmom available) "
-except ImportError:
-    app_log_extra += "(madmom not available) "
 
 try:
     import librosa
@@ -170,28 +161,25 @@ def analyze():
         
         recognized_chords, recognition_method, status_message = [], "None", f"Audio downloaded to {downloaded_mp3_path}"
 
-        if MADMOM_AVAILABLE:
-            app.logger.info(f"Attempting madmom for {downloaded_mp3_path}")
-            try:
-                sig = Signal(downloaded_mp3_path)
-                dbn_proc, crf_proc = DBNChordRecognitionProcessor(), CRFChordRecognitionProcessor()
-                chords_data = crf_proc(dbn_proc(sig))
-                current_chords = [item[2] for item in chords_data if len(item) == 3 and item[2].upper() != 'N']
-                if current_chords: recognized_chords, recognition_method = current_chords, "madmom"; status_message += "; Chords (madmom)"
-                else: status_message += "; Madmom found no valid chords"
-            except Exception as e: status_message += f"; Madmom failed: {e}"
-        
-        if not recognized_chords and LIBROSA_AVAILABLE:
-            app.logger.info(f"Attempting librosa for {downloaded_mp3_path}")
+        # --- Chord Recognition (Librosa only) ---
+        if LIBROSA_AVAILABLE:
+            app.logger.info(f"Attempting chord recognition with librosa for {downloaded_mp3_path}")
             try:
                 chords_from_librosa, librosa_msg = get_librosa_chords_from_audio(downloaded_mp3_path)
-                if chords_from_librosa and chords_from_librosa != ["N"]:
-                    recognized_chords, recognition_method = chords_from_librosa, "librosa"; status_message += f"; Chords (librosa: {librosa_msg})"
-                else: status_message += f"; Librosa found no valid chords ({librosa_msg})"
-            except Exception as e: status_message += f"; Librosa failed: {e}"
-        
-        if not MADMOM_AVAILABLE and not LIBROSA_AVAILABLE: status_message += "; Chord recognition skipped: no library available."
-        
+                if chords_from_librosa and chords_from_librosa != ["N"]: # Librosa succeeded
+                    recognized_chords, recognition_method = chords_from_librosa, "librosa"
+                    status_message += f"; Chord recognition complete (librosa: {librosa_msg})"
+                    app.logger.info(f"Librosa processing successful for {downloaded_mp3_path}: {librosa_msg}")
+                else: # Librosa processed but found no chords or only 'N'
+                    status_message += f"; Librosa processed but found no valid chords ({librosa_msg})"
+                    app.logger.info(f"Librosa found no valid chords for {downloaded_mp3_path}: {librosa_msg}")
+            except Exception as e_librosa:
+                app.logger.error(f"Librosa chord recognition failed for {downloaded_mp3_path}: {e_librosa}")
+                status_message += f"; Librosa processing failed: {e_librosa}"
+        else: # Librosa not available
+            app.logger.warning("Librosa is not available for chord recognition.")
+            status_message += "; Chord recognition skipped: librosa unavailable."
+            
         # --- MIDI Generation ---
         midi_file_path_for_response = None
         if recognized_chords and video_id: # video_id should be available if download succeeded
