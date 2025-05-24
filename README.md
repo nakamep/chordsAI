@@ -26,9 +26,9 @@ Before you begin, ensure you have the following installed:
 
 1.  **Python:** Version 3.10 or newer. You can download it from [python.org](https://www.python.org/).
 2.  **pip:** Python package installer (usually comes with Python).
-3.  **FFmpeg:** This is crucial for `yt-dlp` to extract and convert audio (e.g., to MP3).
-    *   Download FFmpeg from [ffmpeg.org](https://ffmpeg.org/download.html).
-    *   Ensure the `ffmpeg` (and `ffprobe`) executable is in your system's PATH or accessible by `yt-dlp`.
+3.  **FFmpeg:** Required by `yt-dlp` for audio processing.
+    *   **Local Development:** Ensure it's installed on your system and accessible via the PATH. You can download it from [ffmpeg.org](https://ffmpeg.org/download.html).
+    *   **Railway Deployment:** FFmpeg is automatically installed during the build process via the `nixpacks.toml` configuration file included in this repository.
 4.  **Git (Optional):** For cloning the repository. Otherwise, you can download the source code as a ZIP file.
 
 ## Setup and Installation
@@ -54,7 +54,7 @@ Before you begin, ensure you have the following installed:
         ```bash
         pip install -r requirements.txt
         ```
-    *   **FFmpeg Reminder:** Double-check that FFmpeg is installed and accessible in your system's PATH. `yt-dlp` will not be able to process audio effectively without it.
+    *   **FFmpeg Reminder (Local Development):** For local development, double-check that FFmpeg is installed and accessible in your system's PATH. `yt-dlp` will not be able to process audio effectively without it. (For Railway, see Prerequisites).
 
 3.  **Frontend Setup:**
     *   The frontend is a single HTML file located at `static/index.html`.
@@ -98,7 +98,7 @@ While not strictly necessary for this simplified project (as `pip install -r req
 For more general information on build configurations on Railway, refer to their official documentation:
 (See Railway's documentation for more details: https://docs.railway.com/guides/builds#build-command )
 
-Ensure that your chosen Railway plan or environment has access to FFmpeg for full functionality. Railway's Nixpacks often handle common C dependencies, but FFmpeg might need to be explicitly included in your Nixpacks configuration if not available by default.
+The included `nixpacks.toml` file handles the installation of system dependencies like FFmpeg on Railway, ensuring it's available for the application.
 
 ## How to Use
 
@@ -114,7 +114,7 @@ Ensure that your chosen Railway plan or environment has access to FFmpeg for ful
 
 ## Troubleshooting
 
-*   **Errors related to "ffmpeg" or "ffprobe":** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH. For deployments, ensure your platform (e.g., Railway via Nixpacks) provides FFmpeg.
+*   **Errors related to "ffmpeg" or "ffprobe" (Local Development):** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH. (For Railway, FFmpeg is handled by `nixpacks.toml`).
 *   **Frontend shows "Error: Failed to fetch" or similar:**
     *   Ensure the Flask backend server (`python app.py`) is running.
     *   Check the terminal where you ran `python app.py` for any error messages from the backend.
