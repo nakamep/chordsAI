@@ -22,7 +22,7 @@
             const [results, setResults] = React.useState(null);
             const [error, setError] = React.useState('');
 
-            const backendUrl = 'http://localhost:5000';
+            // const backendUrl = 'http://localhost:5000'; // Removed for relative paths
 
             const handleUrlChange = (event) => {
                 setYoutubeUrl(event.target.value);
@@ -35,7 +35,7 @@
                 setError('');
 
                 try {
-                    const response = await fetch(`${backendUrl}/analyze`, {
+                    const response = await fetch('/analyze', { // Changed to relative path
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -137,7 +137,7 @@
                                 <div>
                                     <h3 className="text-md font-medium text-gray-800">Download MIDI:</h3>
                                     <a
-                                        href={`${backendUrl}/${results.midi_file_path}`}
+                                        href={results.midi_file_path} // Changed to relative path (assuming results.midi_file_path is like "static/midi/file.mid")
                                         download
                                         className="inline-block mt-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out"
                                     >
