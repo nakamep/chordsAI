@@ -1,0 +1,8 @@
+Flask
+yt-dlp
+Cython
+numpy
+scipy
+madmom
+librosa
+pretty_midi
