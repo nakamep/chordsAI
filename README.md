@@ -105,7 +105,9 @@ To address this, this repository includes a `build.sh` script. This script ensur
     ```
     (Using `bash build.sh` is generally safer to ensure it's executed with bash. If your `build.sh` has execute permissions, `build.sh` might also work, but `bash build.sh` is more explicit.)
 4.  Ensure your **Root Directory** setting in Railway (if applicable) correctly points to the root of your repository where `build.sh` and `requirements.txt` are located.
-5.  The `build.sh` script also includes `--no-cache-dir` for pip installs, which can be beneficial in CI/CD environments to ensure fresh package downloads and avoid issues with cached versions.
+5.  The `build.sh` script includes several important `pip` flags:
+    *   `--no-cache-dir`: This is beneficial in CI/CD environments to ensure fresh package downloads and avoid issues with cached versions.
+    *   `--no-build-isolation` (used when installing from `requirements.txt`): This is an advanced troubleshooting step to help with packages like `madmom` that have complex build-time requirements, by allowing them to access already installed packages like `Cython` and `NumPy` more easily during their build process.
 
 For more general information on build configurations on Railway, refer to their official documentation:
 (See Railway's documentation for more details: https://docs.railway.com/guides/builds#build-command )
@@ -126,7 +128,7 @@ This setup should allow `madmom` (and consequently all other dependencies) to in
 
 ## Troubleshooting
 
-*   **`madmom` fails to install:** The application is designed to fall back to `librosa`. Ensure `Cython` and `numpy` were installed *before* `pip install -r requirements.txt` (the `build.sh` script handles this for deployments). If `madmom` is critical for you locally, ensure you have the necessary C compiler and Python development headers for your OS.
+*   **`madmom` fails to install:** The application is designed to fall back to `librosa`. Ensure `Cython` and `numpy` were installed *before* `pip install -r requirements.txt` (the `build.sh` script handles this for deployments, using `--no-build-isolation`). If `madmom` is critical for you locally, ensure you have the necessary C compiler and Python development headers for your OS.
 *   **Errors related to "ffmpeg" or "ffprobe":** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH. For deployments, ensure your platform (e.g., Railway via Nixpacks) provides FFmpeg.
 *   **Frontend shows "Error: Failed to fetch" or similar:**
     *   Ensure the Flask backend server (`python app.py`) is running.
