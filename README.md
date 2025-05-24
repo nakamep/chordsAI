@@ -57,7 +57,7 @@ Before you begin, ensure you have the following installed:
     *   **FFmpeg Reminder:** Double-check that FFmpeg is installed and accessible in your system's PATH. `yt-dlp` will not be able to process audio effectively without it.
 
 3.  **Frontend Setup:**
-    *   The frontend is a single HTML file located at `frontend/index.html`.
+    *   The frontend is a single HTML file located at `static/index.html`.
     *   **No build step is required.** It uses CDNs for React, Tailwind CSS, and Babel.
 
 ## Running the Application
@@ -74,7 +74,7 @@ Before you begin, ensure you have the following installed:
         When deployed to platforms like Railway, the application will automatically use the port number specified by the `PORT` environment variable set by the platform.
 
 2.  **Launch the Frontend:**
-    *   Open the `frontend/index.html` file directly in your web browser (e.g., by double-clicking it or using "File > Open" in your browser).
+    *   After starting the backend server, open your web browser and navigate to the Flask server's address (typically `http://localhost:5000/`).
 
 ## Deployment to Railway (or similar platforms)
 
@@ -102,7 +102,7 @@ Ensure that your chosen Railway plan or environment has access to FFmpeg for ful
 
 ## How to Use
 
-1.  Once the backend is running and `frontend/index.html` is open in your browser:
+1.  Once the backend is running, open your web browser and navigate to the Flask server's address (typically `http://localhost:5000/`).
 2.  Enter a valid YouTube video URL into the input field.
 3.  Click the "Extract Chords & Generate MIDI" button.
 4.  Wait for processing. A loading indicator will be shown. This may take some time depending on the video.
