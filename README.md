@@ -85,6 +85,33 @@ Before you begin, ensure you have the following installed:
 2.  **Launch the Frontend:**
     *   Open the `frontend/index.html` file directly in your web browser (e.g., by double-clicking it or using "File > Open" in your browser).
 
+## Deployment to Railway (or similar platforms)
+
+Deploying this application to platforms like Railway requires careful attention to the build process, especially for the `madmom` library.
+
+**The `madmom` Installation Challenge:**
+The `madmom` library needs `Cython` and `numpy` to be installed *before* `madmom` itself is installed. Standard Python build processes on platforms often just run `pip install -r requirements.txt`, which might not install these dependencies in the correct order for `madmom`'s setup script to find them, leading to build failures.
+
+**Solution: `build.sh` Script:**
+To address this, this repository includes a `build.sh` script. This script ensures that `Cython` and `numpy` are installed first, followed by the rest of the dependencies from `requirements.txt`.
+
+**Using `build.sh` on Railway:**
+
+1.  In your Railway project settings, navigate to the **Settings** tab, then find the **Build** section.
+2.  Locate the **Build Command** field.
+3.  Set the `Build Command` to:
+    ```bash
+    bash build.sh
+    ```
+    (Using `bash build.sh` is generally safer to ensure it's executed with bash. If your `build.sh` has execute permissions, `build.sh` might also work, but `bash build.sh` is more explicit.)
+4.  Ensure your **Root Directory** setting in Railway (if applicable) correctly points to the root of your repository where `build.sh` and `requirements.txt` are located.
+5.  The `build.sh` script also includes `--no-cache-dir` for pip installs, which can be beneficial in CI/CD environments to ensure fresh package downloads and avoid issues with cached versions.
+
+For more general information on build configurations on Railway, refer to their official documentation:
+(See Railway's documentation for more details: https://docs.railway.com/guides/builds#build-command )
+
+This setup should allow `madmom` (and consequently all other dependencies) to install correctly in Railway's build environment. If `madmom` still encounters issues, the application's built-in fallback to `librosa` will be used. Also, ensure that your chosen Railway plan or environment has access to a C compiler and FFmpeg for full functionality. Railway's Nixpacks often handle common C dependencies, but FFmpeg might need to be explicitly included in your Nixpacks configuration if not available by default.
+
 ## How to Use
 
 1.  Once the backend is running and `frontend/index.html` is open in your browser:
@@ -99,13 +126,13 @@ Before you begin, ensure you have the following installed:
 
 ## Troubleshooting
 
-*   **`madmom` fails to install:** The application is designed to fall back to `librosa`. Ensure `Cython` and `numpy` were installed *before* `pip install -r requirements.txt`. If `madmom` is critical for you, ensure you have the necessary C compiler and Python development headers for your OS.
-*   **Errors related to "ffmpeg" or "ffprobe":** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH.
+*   **`madmom` fails to install:** The application is designed to fall back to `librosa`. Ensure `Cython` and `numpy` were installed *before* `pip install -r requirements.txt` (the `build.sh` script handles this for deployments). If `madmom` is critical for you locally, ensure you have the necessary C compiler and Python development headers for your OS.
+*   **Errors related to "ffmpeg" or "ffprobe":** This means `yt-dlp` cannot find FFmpeg. Verify your FFmpeg installation and that its directory is in your system's PATH. For deployments, ensure your platform (e.g., Railway via Nixpacks) provides FFmpeg.
 *   **Frontend shows "Error: Failed to fetch" or similar:**
     *   Ensure the Flask backend server (`python app.py`) is running.
     *   Check the terminal where you ran `python app.py` for any error messages from the backend.
-    *   Verify your browser can access `http://localhost:5000`.
-*   **Virtual environment issues:** Ensure your virtual environment is activated before running `pip install` or `python app.py`.
+    *   Verify your browser can access `http://localhost:5000` (or your deployment URL).
+*   **Virtual environment issues:** Ensure your virtual environment is activated before running `pip install` or `python app.py` locally.
 
 This README provides a comprehensive guide for users.
 ```
