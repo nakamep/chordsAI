@@ -10,6 +10,6 @@ echo "Installing Cython and NumPy first..."
 pip install Cython numpy --no-cache-dir # --no-cache-dir can sometimes help with fresher installs
 
 echo "Installing other dependencies from requirements.txt..."
-pip install -r requirements.txt --no-cache-dir
+pip install --no-build-isolation -r requirements.txt --no-cache-dir
 
 echo "Build process completed."
